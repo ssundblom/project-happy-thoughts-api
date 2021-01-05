@@ -3,25 +3,28 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import mongoose from 'mongoose'
 
+const ERR_CANNOT_FIND_ID = ('Sorry, cant find that thought 😕')
+
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/happyThoughts"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
+mongoose.set('useFindAndModify', false)
+
 
 const Thought = mongoose.model('Thought', {
   message: {
-    type: String, 
+    type: String,
     required: true,
     minlength: 5,
     maxlength: 140
-  }, 
+  },
   hearts: {
     type: Number,
     default: 0
-
   },
   createdAt: {
-    type: Date, 
-    default: Date.now 
+    type: Date,
+    default: Date.now
   }
 })
 
@@ -39,22 +42,45 @@ app.get('/', (req, res) => {
 })
 
 app.get('/thoughts', async (req, res) => {
-  const thought = await Thought.find().sort({createdAt: 'desc'}).limit(20).exec()
+  const thought = await Thought.find().sort({ createdAt: 'desc' }).limit(20).exec()
   res.json(thought)
 })
 
 app.post('/thoughts', async (req, res) => {
-  const {message} = req.body
-  const thought = new Thought({message})
+  const { message } = req.body
+  const thought = new Thought({ message })
 
   try {
     const savedThought = await thought.save()
     res.status(201).json(savedThought)
   } catch (err) {
-    res.status(400).json({message: 'Could not save thought'})
+    res.status(400).json({ message: 'Could not save thought' })
   }
 })
 
+app.put('/thoughts/:thoughtId/like', async (req, res) => {
+  const { thoughtId } = req.params
+  const thought = await Thought.findOneAndUpdate({ _id: thoughtId }, {$inc: {'hearts' : 1 }}, { new: true })
+
+  if (thought) {
+    res.status(201).json(thought)
+  } else {
+    res.status(400).json({ message: ERR_CANNOT_FIND_ID })
+  }
+})
+
+
+
+// app.get('/books/id/:id', (req, res) => {
+//   const { id } = req.params
+//   const book = booksData.find(book => book.bookID === +id)
+
+//   if (!book) {
+//     res.status(404).json(ERROR_404)
+//   } else {
+//     res.json(book)
+//   }
+// })
 
 
 // Start the server
