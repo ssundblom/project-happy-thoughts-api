@@ -11,10 +11,13 @@ const Thought = mongoose.model('Thought', {
   message: {
     type: String, 
     required: true,
-    minlength: 5
+    minlength: 5,
+    maxlength: 140
   }, 
   hearts: {
-    type: Number
+    type: Number,
+    default: 0
+
   },
   createdAt: {
     type: Date, 
@@ -40,17 +43,17 @@ app.get('/thoughts', async (req, res) => {
   res.json(thought)
 })
 
-// app.post('/thoughts', async (req, res) => {
-//   const {message, hearts} = req.body
-//   const thought = new Thought({message, hearts})
+app.post('/thoughts', async (req, res) => {
+  const {message} = req.body
+  const thought = new Thought({message})
 
-//   try {
-//     const savedThought = await thought.save()
-//     res.status(201).json(savedThought)
-//   } catch (err) {
-//     res.status(400).json({message: 'Could not save thought'})
-//   }
-// })
+  try {
+    const savedThought = await thought.save()
+    res.status(201).json(savedThought)
+  } catch (err) {
+    res.status(400).json({message: 'Could not save thought'})
+  }
+})
 
 
 
