@@ -52,7 +52,7 @@ app.post('/thoughts', async (req, res) => {
 
   try {
     const savedThought = await thought.save()
-    res.status(201).json(savedThought)
+    res.status(200).json(savedThought)
   } catch (err) {
     res.status(400).json({ message: 'Could not save thought' })
   }
@@ -61,27 +61,12 @@ app.post('/thoughts', async (req, res) => {
 app.put('/thoughts/:thoughtId/like', async (req, res) => {
   const { thoughtId } = req.params
   const thought = await Thought.findOneAndUpdate({ _id: thoughtId }, {$inc: {'hearts' : 1 }}, { new: true })
-
   if (thought) {
-    res.status(201).json(thought)
+    res.status(200).json(thought)
   } else {
     res.status(400).json({ message: ERR_CANNOT_FIND_ID })
   }
 })
-
-
-
-// app.get('/books/id/:id', (req, res) => {
-//   const { id } = req.params
-//   const book = booksData.find(book => book.bookID === +id)
-
-//   if (!book) {
-//     res.status(404).json(ERROR_404)
-//   } else {
-//     res.json(book)
-//   }
-// })
-
 
 // Start the server
 app.listen(port, () => {
